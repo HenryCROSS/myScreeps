@@ -1,12 +1,12 @@
-var roleRepairer = {
+module.exports = roleRepairer = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-
         if (creep.memory.repairing && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.repairing = false;
             creep.say('🔄 harvest');
         }
+
         if (!creep.memory.repairing && creep.store.getFreeCapacity() == 0) {
             creep.memory.repairing = true;
             creep.say('🚧 repairing');
@@ -16,33 +16,37 @@ var roleRepairer = {
          * Find the lowest hp structure
          */
         if (creep.memory.repairing) {
-            /**
-             * @type {Structure}
-             */
-            var targets = creep.room.find(FIND_MY_STRUCTURES);
-            if (targets.length) {
-                let target = targets[1];
+            const targets = creep.room.find(FIND_STRUCTURES, {
+                filter: object => object.hits < object.hitsMax
+            });
 
-                for (let i = 2; i < targets.length; ++i) {
-                    if ((targets[i].hits / targets[i].hitsMax) < (target.hits / target.hitsMax)) {
-                        target = targets[i];
-                    }
-                }
+            targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
 
-                // let target = _.minBy(targets, target => target.hits / target.hitsMax);
-
-                if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+            if (targets.length > 0) {
+                if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets[0]);
                 }
             }
         }
         else {
-            var sources = creep.room.find(FIND_SOURCES);
-            if (creep.harvest(sources[1]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[1], { visualizePathStyle: { stroke: '#ffaa00' } });
-            }
+            retrieveEnergy(creep);
         }
-    }
+    },
 };
 
-module.exports = roleRepairer;
+/** @param {Creep} creep **/
+function retrieveEnergy(creep) {
+    var storage = creep.room.find(FIND_MY_STRUCTURES, {
+        filter: structure => {
+            return (structure.structureType == STRUCTURE_EXTENSION) &&
+                    !structure.store.getFreeCapacity(RESOURCE_ENERGY);
+        }
+    })
+
+    storage = storage[0];
+    if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(storage);
+    }
+}
+
+// module.exports = roleRepairer;
