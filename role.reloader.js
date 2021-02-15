@@ -1,29 +1,30 @@
-module.exports = roleRepairer = {
+module.exports = roleReloader = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        if (creep.memory.repairing && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.repairing = false;
-            creep.say('🔄 harvest');
+        if (creep.memory.reloading && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.reloading = false;
+            creep.say('🔄 retrieving');
         }
 
-        if (!creep.memory.repairing && creep.store.getFreeCapacity() == 0) {
-            creep.memory.repairing = true;
-            creep.say('🚧 repairing');
+        if (!creep.memory.reloading && creep.store.getFreeCapacity() == 0) {
+            creep.memory.reloading = true;
+            creep.say('🚧 reloading');
         }
 
         /**
          * Find the lowest hp structure
          */
-        if (creep.memory.repairing) {
+        if (creep.memory.reloading) {
             const targets = creep.room.find(FIND_STRUCTURES, {
-                filter: object => object.hits < object.hitsMax
+                filter: structure => {
+                    return structure.structureType == STRUCTURE_TOWER &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                }
             });
-
-            targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
-
+            
             if (targets.length > 0) {
-                if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0]);
                 }
             }
