@@ -13,12 +13,19 @@ module.exports.loop = function () {
      */
     var tower = Game.getObjectById('602ad02c66bfcaf35d1a78db');
     if (tower) {
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
-        });
-        if (closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
-        }
+        // var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+        //     filter: (structure) => structure.hits < structure.hitsMax
+        // });
+        // if (closestDamagedStructure) {
+        //     tower.repair(closestDamagedStructure);
+
+        // const targets = tower.room.find(FIND_STRUCTURES, {
+        //     filter: object => object.hits < object.hitsMax
+        // });
+
+        // targets.sort((a, b) => a.hits / a.hitsMax - b.hits / b.hitsMax);
+
+        // tower.repair(targets[0]);
 
         var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (closestHostile) {
@@ -37,10 +44,10 @@ module.exports.loop = function () {
     /**
      * CREEPS NUMBER
      */
-    const HARVESTER_MAX = 6;
+    const HARVESTER_MAX = 4;
     const UPGRADER_MAX = 3;
-    const BUILDER_MAX = 3;
-    const REPAIRER_MAX = 1;
+    const BUILDER_MAX = 0;
+    const REPAIRER_MAX = 2;
     const RELOADER_MAX = 1;
 
     // count harvesters
@@ -50,6 +57,7 @@ module.exports.loop = function () {
     var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == 'repairer');
     var reloaders = _.filter(Game.creeps, (creep) => creep.memory.role == 'reloader');
     console.log('=================================');
+    console.log("Enery:" + Game.spawns['Spawn1'].energyCapacity);
     console.log('Harvesters: ' + harvesters.length);
     console.log('Upgraders: ' + upgraders.length);
     console.log('Builders: ' + builders.length);
@@ -76,7 +84,7 @@ module.exports.loop = function () {
     if (harvesters.length < HARVESTER_MAX) {
         var newName = 'Harvester' + Game.time;
         // console.log('Spawning new harvester: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, MOVE], newName,
+        Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE], newName,
             { memory: { role: 'harvester' } });
     }
 
@@ -92,7 +100,7 @@ module.exports.loop = function () {
     if (builders.length < BUILDER_MAX) {
         var newName = 'builder' + Game.time;
         // console.log('Spawning new builder: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, MOVE], newName,
+        Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE], newName,
             { memory: { role: 'builder' } });
     }
 
